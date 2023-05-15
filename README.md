@@ -9,6 +9,7 @@ Assets are loaded only once per page, regardless of the number of times the dire
 ## Installation
 
 ## CDN
+Laravel Filament users, see end of page.
 ```html
 <script 
     src="https://unpkg.com/alpine-lazy-load-assets@1.0.2/dist/alpine-lazy-load-assets.cdn.js" 
@@ -68,4 +69,25 @@ Example from a Laravel project in combination with Async Alpine:
     ax-load-src="{{ asset('bundles/AlpineFlatPicker/AlpineFlatPicker.js') }}"
     x-data="AlpineFlatPicker(...)"
 >
+```
+
+## Filament
+[Laravel Filament](https://filamentphp.com/)
+
+### Filament v3
+Add the following code to any service provider `register()` method.
+```php
+$this->app->resolving(AssetManager::class, function () {
+    FilamentAsset::register([
+        Js::make('alpine-lazy-load-assets', 'https://unpkg.com/alpine-lazy-load-assets@1.0.2/dist/alpine-lazy-load-assets.cdn.js'),
+    ], 'app'); //change 'app' to a unique key suitable for your project
+});
+```
+
+### Filament v2
+Add the following code to any service providers `boot()` method.
+```php
+Filament::registerScripts([
+    'https://unpkg.com/alpine-lazy-load-assets@1.0.2/dist/alpine-lazy-load-assets.cdn.js',
+], true);
 ```
