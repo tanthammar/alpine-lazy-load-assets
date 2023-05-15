@@ -1,8 +1,8 @@
 # Alpine.js - lazy load assets
-This package provides a directive for lazy loading JavaScript and CSS assets in [Alpine.js](https://alpinejs.dev/) projects.
+This package provides directives for lazy loading JavaScript and CSS assets in [Alpine.js](https://alpinejs.dev/) projects.
 
-**Note:** This package is specifically designed for lazy loading css/js assets but does **_not_** handle lazy loading of Alpine components. You should use [Alpine.js](https://alpinejs.dev/) for that. 
-However, it is a perfect companion to use alongside Async Alpine to lazy load all the assets required by your Alpine.js components.
+**Note:** This package is specifically designed for lazy loading css/js assets but does **_not_** handle lazy loading of Alpine components. You could use [Async Alpine](https://async-alpine.dev/) for that. 
+However, it is the perfect companion to use alongside Async Alpine to lazy load all the assets required by your Alpine.js components.
 
 Assets are loaded only once per page, regardless of the number of times the directives are used.
 
