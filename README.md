@@ -11,7 +11,7 @@ Assets are only loaded once (on a page), no matter how many times you use the di
 ## CDN
 ```html
 <script 
-    src="https://unpkg.com/alpine-lazy-load-assets@1.0.1/dist/alpine-lazy-load-assets.cdn.js" 
+    src="https://unpkg.com/alpine-lazy-load-assets@1.0.2/dist/alpine-lazy-load-assets.cdn.js" 
     defer
 ></script>
 ```
