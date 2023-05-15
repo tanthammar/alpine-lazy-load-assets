@@ -48,6 +48,7 @@ You can add a css link `media` attribute.
 **Warning**: Please note that when the media attribute is added to an element with multiple CSS files, it will be applied to all of them.
 ```html
 <div x-load-css="['/path/to/your/css/file.css']"></div>
+//or with media attribute
 <div x-load-css="['/path/to/your/css/print-file.css']" media="print"></div>
 ```
 
