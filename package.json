@@ -1,15 +1,15 @@
 {
   "name": "alpine-lazy-load-assets",
   "description": "Alpine.js directive to lazy load css and js assets",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "keywords": [
     "Alpinejs",
     "lazy"
   ],
   "license": "Apache-2.0",
   "author": {
-      "name": "Tina Hammar",
-      "email": "tinahammar@gmail.com"
+    "name": "Tina Hammar",
+    "email": "tinahammar@gmail.com"
   },
   "repository": {
     "type": "git",
