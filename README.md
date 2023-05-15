@@ -2,7 +2,7 @@
 [Alpine.js](https://alpinejs.dev/) directive to lazy load js and css assets.
 
 This package is **_NOT_** meant to lazy load Alpine components. You will want to use [Async Alpine](https://async-alpine.dev/) for that.
-It is however **the perfect complement to Async Alpine**. As it lazy loads all assets your Alpine.js component needs.
+It is however **the perfect complement to Async Alpine**, as it lazy loads all assets your Alpine.js component needs.
 
 Assets are only loaded once (on a page), no matter how many times you use the directives.
 
@@ -52,7 +52,7 @@ You can add media attributes to the `<link>` tag by adding a `media` attribute t
 
 ## Multiple files
 Both directives accept an array of files.
-```html
+
 Example from a Laravel project in combination with Async Alpine:
 ```html
 <div
