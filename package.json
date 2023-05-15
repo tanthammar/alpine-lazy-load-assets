@@ -1,0 +1,34 @@
+{
+  "name": "alpine-lazy-load-assets",
+  "description": "Alpine.js directive to lazy load css and js assets",
+  "version": "1.0.1",
+  "keywords": [
+    "Alpinejs",
+    "lazy"
+  ],
+  "license": "Apache-2.0",
+  "author": {
+      "name": "Tina Hammar",
+      "email": "tinahammar@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tanthammar/alpine-lazy-load-assets"
+  },
+  "main": "dist/alpine-lazy-load-assets.cdn.js",
+  "module": "dist/alpine-lazy-load-assets.esm.js",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "esbuild": "^0.13.15"
+  },
+  "scripts": {
+    "prod": "node bin/build.js"
+  },
+  "bugs": {
+    "url": "https://github.com/tanthammar/alpine-lazy-load-assets/issues"
+  },
+  "homepage": "https://github.com/tanthammar/alpine-lazy-load-assets#readme"
+}
