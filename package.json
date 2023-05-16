@@ -1,7 +1,7 @@
 {
   "name": "alpine-lazy-load-assets",
   "description": "Alpine.js directive to lazy load css and js assets",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "keywords": [
     "Alpinejs",
     "lazy"
