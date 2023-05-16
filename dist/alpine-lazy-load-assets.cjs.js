@@ -1,1 +1,60 @@
-var i=Object.defineProperty;var u=r=>i(r,"__esModule",{value:!0});var f=(r,o)=>{u(r);for(var c in o)i(r,c,{get:o[c],enumerable:!0})};f(exports,{default:()=>h});function m(r){r.directive("load-css",(o,{expression:c},{evaluate:n})=>{try{let e=n(c);e==null||e.forEach(a=>{var d,l;if(document.querySelector(`link[href="${a}"]`))return;let t=document.createElement("link");t.type="text/css",t.rel="stylesheet",t.href=a;let s=(l=(d=o.attributes)==null?void 0:d.media)==null?void 0:l.value;s&&(t.media=s),document.getElementsByTagName("head")[0].appendChild(t)})}catch(e){console.error(e)}}),r.directive("load-js",(o,{expression:c},{evaluate:n})=>{try{let e=n(c);e==null||e.forEach(a=>{if(document.querySelector(`script[src="${a}"]`))return;let t=document.createElement("script");t.src=a,document.getElementsByTagName("head")[0].appendChild(t)})}catch(e){console.error(e)}})}var h=m;0&&(module.exports={});
+var __defProp = Object.defineProperty;
+var __markAsModule = (target) => __defProp(target, "__esModule", { value: true });
+var __export = (target, all) => {
+  __markAsModule(target);
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
+// src/module.js
+__export(exports, {
+  default: () => module_default
+});
+
+// src/core/alpine-lazy-load-assets.js
+function alpine_lazy_load_assets_default(Alpine) {
+  Alpine.directive("load-css", (el, { expression }, { evaluate }) => {
+    try {
+      const paths = evaluate(expression);
+      paths == null ? void 0 : paths.forEach((path) => {
+        var _a, _b;
+        if (document.querySelector(`link[href="${path}"]`)) {
+          return;
+        }
+        const link = document.createElement("link");
+        link.type = "text/css";
+        link.rel = "stylesheet";
+        link.href = path;
+        const mediaAttr = (_b = (_a = el.attributes) == null ? void 0 : _a.media) == null ? void 0 : _b.value;
+        if (mediaAttr) {
+          link.media = mediaAttr;
+        }
+        const head = document.getElementsByTagName("head")[0];
+        head.appendChild(link);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  });
+  Alpine.directive("load-js", (el, { expression }, { evaluate }) => {
+    try {
+      const paths = evaluate(expression);
+      paths == null ? void 0 : paths.forEach((path) => {
+        if (document.querySelector(`script[src="${path}"]`)) {
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = path;
+        const head = document.getElementsByTagName("head")[0];
+        head.appendChild(script);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  });
+}
+
+// src/module.js
+var module_default = alpine_lazy_load_assets_default;
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {});
