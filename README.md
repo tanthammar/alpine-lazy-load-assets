@@ -62,8 +62,8 @@ Example from a Laravel project in combination with Async Alpine:
         'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/{{ $locale }}.js'
     ]"
     x-load-css="[
-        {{ asset('bundles/AlpineFlatPicker/AlpineFlatPicker.css') }},
-        'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/{{ $theme }}.css
+        '{{ asset('bundles/AlpineFlatPicker/AlpineFlatPicker.css') }}',
+        'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/{{ $theme }}.css'
     ]"
     x-ignore
     ax-load="visible"
@@ -76,6 +76,9 @@ Example from a Laravel project in combination with Async Alpine:
 [Laravel Filament](https://filamentphp.com/)
 
 ### Filament v3
+This package is included from Filament v3.0.0-alpha102. (No need to do anything).
+
+If you are on an earlier version or for other reasons need to add this manually ...
 Add the following code to any service provider `register()` method.
 ```php
 $this->app->resolving(AssetManager::class, function () {
