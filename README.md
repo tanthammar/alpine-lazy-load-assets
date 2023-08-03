@@ -10,6 +10,7 @@ However, it is the perfect companion to use alongside Async Alpine to lazy load 
 - Lazily load CSS and JS files on-demand.
 - Prevent redundant loading of the same asset.
 - Saves loaded assets in Alpine global state to avoid reloading them, and to check asset existence.
+- Position scripts in head, body-start or body-end.
 - Optionally dispatch window events when assets have finished loading.
 
 ## Installation
