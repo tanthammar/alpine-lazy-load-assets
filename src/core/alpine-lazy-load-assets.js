@@ -91,9 +91,9 @@ export default function (Alpine) {
 
         Promise.all(paths.map(path => loadCSS(path, mediaAttr)))
             .then(() => {
-                console.log('All CSS files loaded!')
+                //console.log('All CSS files loaded!')
                 if (eventName) {
-                    console.log('dispatching event: ' + eventName + '-css')
+                    //console.log('dispatching event: ' + eventName + '-css')
                     window.dispatchEvent(assetLoadedEvent(eventName + '-css'))
                 }
             })
@@ -111,9 +111,9 @@ export default function (Alpine) {
 
         Promise.all(paths.map(path => loadJS(path, position)))
             .then(() => {
-                console.log('All JS files loaded!')
+                //console.log('All JS files loaded!')
                 if (eventName) {
-                    console.log('dispatching event: ' + eventName + '-js')
+                    //console.log('dispatching event: ' + eventName + '-js')
                     window.dispatchEvent(assetLoadedEvent(eventName + '-js'))
                 }
             })

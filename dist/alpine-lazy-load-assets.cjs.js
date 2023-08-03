@@ -73,9 +73,7 @@ function alpine_lazy_load_assets_default(Alpine) {
     const mediaAttr = el.media;
     const eventName = el.getAttribute("data-dispatch");
     Promise.all(paths.map((path) => loadCSS(path, mediaAttr))).then(() => {
-      console.log("All CSS files loaded!");
       if (eventName) {
-        console.log("dispatching event: " + eventName + "-css");
         window.dispatchEvent(assetLoadedEvent(eventName + "-css"));
       }
     }).catch((error) => {
@@ -87,9 +85,7 @@ function alpine_lazy_load_assets_default(Alpine) {
     const position = new Set(modifiers);
     const eventName = el.getAttribute("data-dispatch");
     Promise.all(paths.map((path) => loadJS(path, position))).then(() => {
-      console.log("All JS files loaded!");
       if (eventName) {
-        console.log("dispatching event: " + eventName + "-js");
         window.dispatchEvent(assetLoadedEvent(eventName + "-js"));
       }
     }).catch((error) => {
