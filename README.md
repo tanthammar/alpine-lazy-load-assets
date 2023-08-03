@@ -18,7 +18,7 @@ However, it is the perfect companion to use alongside Async Alpine to lazy load 
 Laravel Filament users, see end of page.
 ```html
 <script 
-    src="https://unpkg.com/alpine-lazy-load-assets@1.0.4/dist/alpine-lazy-load-assets.cdn.js" 
+    src="https://unpkg.com/alpine-lazy-load-assets@latest/dist/alpine-lazy-load-assets.cdn.js" 
     defer
 ></script>
 ```
@@ -136,7 +136,7 @@ Add the following code to any service provider `register()` method.
 ```php
 $this->app->resolving(AssetManager::class, function () {
     FilamentAsset::register([
-        Js::make('alpine-lazy-load-assets', 'https://unpkg.com/alpine-lazy-load-assets@1.0.4/dist/alpine-lazy-load-assets.cdn.js'),
+        Js::make('alpine-lazy-load-assets', 'https://unpkg.com/alpine-lazy-load-assets@latest/dist/alpine-lazy-load-assets.cdn.js'),
     ], 'app'); //change 'app' to a unique key suitable for your project
 });
 ```
@@ -145,7 +145,7 @@ $this->app->resolving(AssetManager::class, function () {
 Add the following code to any service providers `boot()` method.
 ```php
 Filament::registerScripts([
-    'https://unpkg.com/alpine-lazy-load-assets@1.0.4/dist/alpine-lazy-load-assets.cdn.js',
+    'https://unpkg.com/alpine-lazy-load-assets@latest/dist/alpine-lazy-load-assets.cdn.js',
 ], true);
 ```
 
