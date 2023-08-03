@@ -111,7 +111,7 @@ The script will append `-css` or `-js` to the event name, depending on which dir
 <div x-on:foo-loaded-js.window="alert('the JS file was loaded')"></div>
 ```
 
-## Global state, check if asset is loaded
+## Global state, check if assets are loaded
 The loaded assets are saved in `lazyLoadedAssets` global state, allowing you to `check` if an asset has already been loaded.
 ```js
 //in any Alpine component
