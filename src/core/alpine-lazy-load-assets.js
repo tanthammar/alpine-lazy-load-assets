@@ -23,103 +23,89 @@ export default function (Alpine) {
         })
     }
 
+    function createDomElement(elementType, attributes = {}, targetElement, insertBeforeElement) {
+        const element = document.createElement(elementType);
+
+        for (const [attribute, value] of Object.entries(attributes)) {
+            element[attribute] = value;
+        }
+
+        if (targetElement) {
+            if (insertBeforeElement) {
+                targetElement.insertBefore(element, insertBeforeElement);
+            } else {
+                targetElement.appendChild(element);
+            }
+        }
+
+        return element;
+    }
+
+    function loadAsset(elementType, path, attributes = {}, targetElement = null, insertBeforeElement = null) {
+        const selector = (elementType === 'link') ? `link[href="${path}"]` : `script[src="${path}"]`;
+
+        if (document.querySelector(selector) || Alpine.store('lazyLoadedAssets').check(path)) {
+            return Promise.resolve()
+        }
+
+        const element = createDomElement(elementType, { ...attributes, href: path }, targetElement, insertBeforeElement);
+
+        return new Promise((resolve, reject) => {
+            element.onload = () => {
+                Alpine.store('lazyLoadedAssets').markLoaded(path);
+                resolve();
+            }
+
+            element.onerror = () => {
+                reject(new Error(`Failed to load ${elementType}: ${path}`));
+            }
+        });
+    }
+
+    // Function to load CSS file and mark it as loaded in the store
     // Function to load CSS file and mark it as loaded in the store
     async function loadCSS(path, mediaAttr, position = null, target = null) {
-        if (
-            document.querySelector(`link[href="${path}"]`)
-            || Alpine.store('lazyLoadedAssets').check(path)
-        ) {
-            return
-        }
-
-        const link = document.createElement('link')
-        link.type = 'text/css'
-        link.rel = 'stylesheet'
-        link.href = path
-
+        // Define attributes for CSS link element
+        const attributes = { type: 'text/css', rel: 'stylesheet' };
         if (mediaAttr) {
-            link.media = mediaAttr
+            attributes.media = mediaAttr;
         }
 
-        // if position and target are defined, position the link based on the target link
+        // Determine target element and position
+        let targetElement = document.head;
+        let insertBeforeElement = null;
         if (position && target) {
             const targetLink = document.querySelector(`link[href*="${target}"]`)
-
             if (targetLink) {
-                if (position === 'before') {
-                    targetLink.parentNode.insertBefore(link, targetLink)
-                } else if (position === 'after') {
-                    if (targetLink.nextSibling) {
-                        targetLink.parentNode.insertBefore(link, targetLink.nextSibling)
-                    } else {
-                        targetLink.parentNode.appendChild(link)
-                    }
-                }
+                targetElement = targetLink.parentNode;
+                insertBeforeElement = (position === 'before') ? targetLink : targetLink.nextSibling;
             } else {
-                console.warn(`Target (${target}) not found for ${path}. Appending to head.`)
-                document.head.append(link)
+                console.warn(`Target (${target}) not found for ${path}. Appending to head.`);
             }
-        } else {
-            document.head.append(link)
         }
 
-        await new Promise((resolve, reject) => {
-            link.onload = () => {
-                Alpine.store('lazyLoadedAssets').markLoaded(path)
-                resolve()
-            }
-
-            link.onerror = () => {
-                reject(new Error(`Failed to load CSS: ${path}`))
-            }
-        })
+        await loadAsset('link', path, attributes, targetElement, insertBeforeElement);
     }
 
     // Function to load JS file and mark it as loaded in the store
+    // Function to load JS file and mark it as loaded in the store
     async function loadJS(path, position, relativePosition = null, targetScript = null) {
-        if (
-            document.querySelector(`script[src="${path}"]`)
-            || Alpine.store('lazyLoadedAssets').check(path)
-        ) {
-            return
-        }
-
-        const script = document.createElement('script')
-        script.src = path
-
+        // Determine target element and position
+        let positionElement, insertBeforeElement;
         if (relativePosition && targetScript) {
-            const target = document.querySelector(`script[src*="${targetScript}"`)
-
-            if (target) {
-                if (relativePosition === 'before') {
-                    target.parentNode.insertBefore(script, target)
-                } else if (relativePosition === 'after') {
-                    if (target.nextSibling) {
-                        target.parentNode.insertBefore(script, target.nextSibling)
-                    } else {
-                        target.parentNode.appendChild(script)
-                    }
-                }
+            positionElement = document.querySelector(`script[src*="${targetScript}"]`);
+            if (positionElement) {
+                insertBeforeElement = relativePosition === 'before'
+                    ? positionElement
+                    : positionElement.nextSibling;
             } else {
-                console.warn(`Target (${targetScript}) not found for ${path}. Appending to body.`)
-                document.body.append(script)
+                console.warn(`Target (${targetScript}) not found for ${path}. Appending to body.`);
             }
-        } else {
-            position.has('body-start')
-                ? document.body.prepend(script)
-                : document[position.has('body-end') ? 'body' : 'head'].append(script)
         }
 
-        await new Promise((resolve, reject) => {
-            script.onload = () => {
-                Alpine.store('lazyLoadedAssets').markLoaded(path)
-                resolve()
-            }
+        const insertLocation = position.has('body-start') ? 'prepend' : 'append';
 
-            script.onerror = () => {
-                reject(new Error(`Failed to load JS: ${path}`))
-            }
-        })
+        await loadAsset('script', path, {}, positionElement || document[position.has('body-end') ? 'body' : 'head'], insertBeforeElement);
     }
 
     // Custom directive to load CSS and mark it as loaded in the store

@@ -54,6 +54,7 @@ Livewire.start();
 
 ### x-load-js
 The `x-load-js` directive adds a `<script>` tag to the `head` or `body` of your document.
+You can also position the script before or after an existing script. You don't have to supply a full path, the script searches for a script tag that **contains** the given value.
 ```html
 //appended to <head>
 <div x-load-js="['/path/to/your/js/file.js']"></div>
@@ -63,17 +64,30 @@ The `x-load-js` directive adds a `<script>` tag to the `head` or `body` of your 
 
 //appended to <body>
 <div x-load-js.body-end="['/path/to/your/js/file.js']"></div>
+
+//position before an existing script. 
+<div data-js-before="app.js" x-load-js="['/path/to/your/js/file.js']"></div>
+
+//position after an existing script. 
+<div data-js-after="app.js" x-load-js="['/path/to/your/js/file.js']"></div>
 ```
 
 ### x-load-css
-The `x-load-css` directive adds a `<link>` tag to the `<head>` of your document.
+The `x-load-css` directive adds a `<link>` tag to the `<head>` of your document. 
 You can add a css link `media` attribute. 
 **Warning**: Please note that when the media attribute is added to an element with multiple CSS files, it will be applied to all of them.
+You can also position the link before or after an existing css link. You don't have to supply a full path, the script searches for a css link that **contains** the given value.
 ```html
 <div x-load-css="['/path/to/your/css/file.css']"></div>
 
 //or with media attribute
 <div x-load-css="['/path/to/your/css/print-file.css']" media="print"></div>
+
+//position before an existing css link.
+<div data-css-before="app.css" x-load-css="['/path/to/your/css/file.js']"></div>
+
+//position after an existing css link.
+<div data-css-after="app.css" x-load-css="['/path/to/your/css/file.js']"></div>
 ```
 
 ## Multiple files
