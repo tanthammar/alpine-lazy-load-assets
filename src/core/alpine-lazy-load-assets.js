@@ -1,5 +1,4 @@
 export default function (Alpine) {
-    // Initialize Alpine store for CSS and JS loading status
     Alpine.store('lazyLoadedAssets', {
         loaded: new Set(),
         check(paths) {
@@ -62,8 +61,6 @@ export default function (Alpine) {
         });
     }
 
-    // Function to load CSS file and mark it as loaded in the store
-    // Function to load CSS file and mark it as loaded in the store
     async function loadCSS(path, mediaAttr, position = null, target = null) {
         // Define attributes for CSS link element
         const attributes = { type: 'text/css', rel: 'stylesheet' };
@@ -87,8 +84,6 @@ export default function (Alpine) {
         await loadAsset('link', path, attributes, targetElement, insertBeforeElement);
     }
 
-    // Function to load JS file and mark it as loaded in the store
-    // Function to load JS file and mark it as loaded in the store
     async function loadJS(path, position, relativePosition = null, targetScript = null) {
         // Determine target element and position
         let positionElement, insertBeforeElement;
@@ -108,7 +103,6 @@ export default function (Alpine) {
         await loadAsset('script', path, {}, positionElement || document[position.has('body-end') ? 'body' : 'head'], insertBeforeElement);
     }
 
-    // Custom directive to load CSS and mark it as loaded in the store
     Alpine.directive('load-css', (el, { expression }, { evaluate }) => {
         const paths = evaluate(expression)
         const mediaAttr = el.media
@@ -129,7 +123,6 @@ export default function (Alpine) {
             })
     })
 
-    // Custom directive to load JS and mark it as loaded in the store
     Alpine.directive('load-js', (el, { expression, modifiers }, { evaluate }) => {
         const paths = evaluate(expression)
         const position = new Set(modifiers)
