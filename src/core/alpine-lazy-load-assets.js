@@ -24,7 +24,7 @@ export default function (Alpine) {
     }
 
     // Function to load CSS file and mark it as loaded in the store
-    async function loadCSS(path, mediaAttr) {
+    async function loadCSS(path, mediaAttr, position = null, target = null) {
         if (
             document.querySelector(`link[href="${path}"]`)
             || Alpine.store('lazyLoadedAssets').check(path)
@@ -41,7 +41,27 @@ export default function (Alpine) {
             link.media = mediaAttr
         }
 
-        document.head.append(link)
+        // if position and target are defined, position the link based on the target link
+        if (position && target) {
+            const targetLink = document.querySelector(`link[href*="${target}"]`)
+
+            if (targetLink) {
+                if (position === 'before') {
+                    targetLink.parentNode.insertBefore(link, targetLink)
+                } else if (position === 'after') {
+                    if (targetLink.nextSibling) {
+                        targetLink.parentNode.insertBefore(link, targetLink.nextSibling)
+                    } else {
+                        targetLink.parentNode.appendChild(link)
+                    }
+                }
+            } else {
+                console.warn(`Target (${target}) not found for ${path}. Appending to head.`)
+                document.head.append(link)
+            }
+        } else {
+            document.head.append(link)
+        }
 
         await new Promise((resolve, reject) => {
             link.onload = () => {
@@ -56,7 +76,7 @@ export default function (Alpine) {
     }
 
     // Function to load JS file and mark it as loaded in the store
-    async function loadJS(path, position) {
+    async function loadJS(path, position, relativePosition = null, targetScript = null) {
         if (
             document.querySelector(`script[src="${path}"]`)
             || Alpine.store('lazyLoadedAssets').check(path)
@@ -67,9 +87,28 @@ export default function (Alpine) {
         const script = document.createElement('script')
         script.src = path
 
-        position.has('body-start')
-            ? document.body.prepend(script)
-            : document[position.has('body-end') ? 'body' : 'head'].append(script)
+        if (relativePosition && targetScript) {
+            const target = document.querySelector(`script[src*="${targetScript}"`)
+
+            if (target) {
+                if (relativePosition === 'before') {
+                    target.parentNode.insertBefore(script, target)
+                } else if (relativePosition === 'after') {
+                    if (target.nextSibling) {
+                        target.parentNode.insertBefore(script, target.nextSibling)
+                    } else {
+                        target.parentNode.appendChild(script)
+                    }
+                }
+            } else {
+                console.warn(`Target (${targetScript}) not found for ${path}. Appending to body.`)
+                document.body.append(script)
+            }
+        } else {
+            position.has('body-start')
+                ? document.body.prepend(script)
+                : document[position.has('body-end') ? 'body' : 'head'].append(script)
+        }
 
         await new Promise((resolve, reject) => {
             script.onload = () => {
@@ -88,8 +127,10 @@ export default function (Alpine) {
         const paths = evaluate(expression)
         const mediaAttr = el.media
         const eventName = el.getAttribute('data-dispatch')
+        const position = el.getAttribute('data-css-before') ? 'before' : el.getAttribute('data-css-after') ? 'after' : null
+        const target = el.getAttribute('data-css-before') || el.getAttribute('data-css-after') || null
 
-        Promise.all(paths.map(path => loadCSS(path, mediaAttr)))
+        Promise.all(paths.map(path => loadCSS(path, mediaAttr, position, target)))
             .then(() => {
                 //console.log('All CSS files loaded!')
                 if (eventName) {
@@ -106,10 +147,12 @@ export default function (Alpine) {
     Alpine.directive('load-js', (el, { expression, modifiers }, { evaluate }) => {
         const paths = evaluate(expression)
         const position = new Set(modifiers)
+        const relativePosition = el.getAttribute('data-js-before') ? 'before' : el.getAttribute('data-js-after') ? 'after' : null
+        const targetScript = el.getAttribute('data-js-before') || el.getAttribute('data-js-after') || null
 
         const eventName = el.getAttribute('data-dispatch')
 
-        Promise.all(paths.map(path => loadJS(path, position)))
+        Promise.all(paths.map(path => loadJS(path, position, relativePosition, targetScript)))
             .then(() => {
                 //console.log('All JS files loaded!')
                 if (eventName) {
