@@ -16,50 +16,74 @@ function alpine_lazy_load_assets_default(Alpine) {
       cancelable: true
     });
   }
-  async function loadCSS(path, mediaAttr) {
-    if (document.querySelector(`link[href="${path}"]`) || Alpine.store("lazyLoadedAssets").check(path)) {
-      return;
+  function createDomElement(elementType, attributes = {}, targetElement, insertBeforeElement) {
+    const element = document.createElement(elementType);
+    for (const [attribute, value] of Object.entries(attributes)) {
+      element[attribute] = value;
     }
-    const link = document.createElement("link");
-    link.type = "text/css";
-    link.rel = "stylesheet";
-    link.href = path;
-    if (mediaAttr) {
-      link.media = mediaAttr;
+    if (targetElement) {
+      if (insertBeforeElement) {
+        targetElement.insertBefore(element, insertBeforeElement);
+      } else {
+        targetElement.appendChild(element);
+      }
     }
-    document.head.append(link);
-    await new Promise((resolve, reject) => {
-      link.onload = () => {
+    return element;
+  }
+  function loadAsset(elementType, path, attributes = {}, targetElement = null, insertBeforeElement = null) {
+    const selector = elementType === "link" ? `link[href="${path}"]` : `script[src="${path}"]`;
+    if (document.querySelector(selector) || Alpine.store("lazyLoadedAssets").check(path)) {
+      return Promise.resolve();
+    }
+    const element = createDomElement(elementType, { ...attributes, href: path }, targetElement, insertBeforeElement);
+    return new Promise((resolve, reject) => {
+      element.onload = () => {
         Alpine.store("lazyLoadedAssets").markLoaded(path);
         resolve();
       };
-      link.onerror = () => {
-        reject(new Error(`Failed to load CSS: ${path}`));
+      element.onerror = () => {
+        reject(new Error(`Failed to load ${elementType}: ${path}`));
       };
     });
   }
-  async function loadJS(path, position) {
-    if (document.querySelector(`script[src="${path}"]`) || Alpine.store("lazyLoadedAssets").check(path)) {
-      return;
+  async function loadCSS(path, mediaAttr, position = null, target = null) {
+    const attributes = { type: "text/css", rel: "stylesheet" };
+    if (mediaAttr) {
+      attributes.media = mediaAttr;
     }
-    const script = document.createElement("script");
-    script.src = path;
-    position.has("body-start") ? document.body.prepend(script) : document[position.has("body-end") ? "body" : "head"].append(script);
-    await new Promise((resolve, reject) => {
-      script.onload = () => {
-        Alpine.store("lazyLoadedAssets").markLoaded(path);
-        resolve();
-      };
-      script.onerror = () => {
-        reject(new Error(`Failed to load JS: ${path}`));
-      };
-    });
+    let targetElement = document.head;
+    let insertBeforeElement = null;
+    if (position && target) {
+      const targetLink = document.querySelector(`link[href*="${target}"]`);
+      if (targetLink) {
+        targetElement = targetLink.parentNode;
+        insertBeforeElement = position === "before" ? targetLink : targetLink.nextSibling;
+      } else {
+        console.warn(`Target (${target}) not found for ${path}. Appending to head.`);
+      }
+    }
+    await loadAsset("link", path, attributes, targetElement, insertBeforeElement);
+  }
+  async function loadJS(path, position, relativePosition = null, targetScript = null) {
+    let positionElement, insertBeforeElement;
+    if (relativePosition && targetScript) {
+      positionElement = document.querySelector(`script[src*="${targetScript}"]`);
+      if (positionElement) {
+        insertBeforeElement = relativePosition === "before" ? positionElement : positionElement.nextSibling;
+      } else {
+        console.warn(`Target (${targetScript}) not found for ${path}. Appending to body.`);
+      }
+    }
+    const insertLocation = position.has("body-start") ? "prepend" : "append";
+    await loadAsset("script", path, {}, positionElement || document[position.has("body-end") ? "body" : "head"], insertBeforeElement);
   }
   Alpine.directive("load-css", (el, { expression }, { evaluate }) => {
     const paths = evaluate(expression);
     const mediaAttr = el.media;
     const eventName = el.getAttribute("data-dispatch");
-    Promise.all(paths.map((path) => loadCSS(path, mediaAttr))).then(() => {
+    const position = el.getAttribute("data-css-before") ? "before" : el.getAttribute("data-css-after") ? "after" : null;
+    const target = el.getAttribute("data-css-before") || el.getAttribute("data-css-after") || null;
+    Promise.all(paths.map((path) => loadCSS(path, mediaAttr, position, target))).then(() => {
       if (eventName) {
         window.dispatchEvent(assetLoadedEvent(eventName + "-css"));
       }
@@ -70,8 +94,10 @@ function alpine_lazy_load_assets_default(Alpine) {
   Alpine.directive("load-js", (el, { expression, modifiers }, { evaluate }) => {
     const paths = evaluate(expression);
     const position = new Set(modifiers);
+    const relativePosition = el.getAttribute("data-js-before") ? "before" : el.getAttribute("data-js-after") ? "after" : null;
+    const targetScript = el.getAttribute("data-js-before") || el.getAttribute("data-js-after") || null;
     const eventName = el.getAttribute("data-dispatch");
-    Promise.all(paths.map((path) => loadJS(path, position))).then(() => {
+    Promise.all(paths.map((path) => loadJS(path, position, relativePosition, targetScript))).then(() => {
       if (eventName) {
         window.dispatchEvent(assetLoadedEvent(eventName + "-js"));
       }
