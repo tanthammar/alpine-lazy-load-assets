@@ -47,7 +47,8 @@ export default function (Alpine) {
             return Promise.resolve()
         }
 
-        const element = createDomElement(elementType, { ...attributes, href: path }, targetElement, insertBeforeElement);
+        const elementAttributes = elementType === "link" ? { ...attributes, href: path } : { ...attributes, src: path }
+        const element = createDomElement(elementType, elementAttributes, targetElement, insertBeforeElement);
 
         return new Promise((resolve, reject) => {
             element.onload = () => {
