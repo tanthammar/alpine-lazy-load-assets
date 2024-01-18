@@ -35,7 +35,8 @@ function alpine_lazy_load_assets_default(Alpine) {
     if (document.querySelector(selector) || Alpine.store("lazyLoadedAssets").check(path)) {
       return Promise.resolve();
     }
-    const element = createDomElement(elementType, { ...attributes, href: path }, targetElement, insertBeforeElement);
+    const elementAttributes = elementType === "link" ? { ...attributes, href: path } : { ...attributes, src: path };
+    const element = createDomElement(elementType, elementAttributes, targetElement, insertBeforeElement);
     return new Promise((resolve, reject) => {
       element.onload = () => {
         Alpine.store("lazyLoadedAssets").markLoaded(path);
