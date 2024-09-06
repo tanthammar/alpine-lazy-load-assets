@@ -130,8 +130,9 @@ export default function (Alpine) {
      * @param {Set<String>} position - Set containing position modifiers (e.g., 'body-start', 'body-end')
      * @param {String} relativePosition - Relative position to insert the new script element (before or after)
      * @param {String} targetScript - Target script element before or after which the new script element will be inserted
+     * @param {String} asModule - Adds type="module" if not null
      */
-    const loadJS = async (path, position, relativePosition = null, targetScript = null) => {
+    const loadJS = async (path, position, relativePosition = null, targetScript = null, asModule = null) => {
         // Default insertion point is head
         let targetElement = document.head
         let insertBeforeElement = null
@@ -158,7 +159,12 @@ export default function (Alpine) {
             }
         }
 
-        await loadAsset('script', path, {}, targetElement, insertBeforeElement)
+        const attributes = {}
+        if(asModule){
+            attributes.type = 'module'
+        }
+
+        await loadAsset('script', path, attributes, targetElement, insertBeforeElement);
     }
 
     Alpine.directive('load-css', (el, { expression }, { evaluate }) => {
@@ -184,9 +190,10 @@ export default function (Alpine) {
         const position = new Set(modifiers)
         const relativePosition = el.getAttribute('data-js-before') ? 'before' : el.getAttribute('data-js-after') ? 'after' : null
         const targetScript = el.getAttribute('data-js-before') || el.getAttribute('data-js-after') || null
+        const asModule = el.getAttribute('data-js-as-module') || el.getAttribute('data-as-module') || false
         const eventName = el.getAttribute('data-dispatch')
 
-        Promise.all(paths.map(path => loadJS(path, position, relativePosition, targetScript)))
+        Promise.all(paths.map(path => loadJS(path, position, relativePosition, targetScript,asModule)))
             .then(() => {
                 //console.log('All JS files loaded!')
                 if (eventName) {
