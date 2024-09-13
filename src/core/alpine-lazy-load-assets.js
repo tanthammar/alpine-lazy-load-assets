@@ -4,23 +4,25 @@
  */
 export default function (Alpine) {
 
-    // Create a store to keep track of loaded assets
-    Alpine.store('lazyLoadedAssets', {
-        loaded: new Set(),
+    document.addEventListener('alpine:init', () => {
+        // Create a store to keep track of loaded assets
+        Alpine.store('lazyLoadedAssets', {
+            loaded: new Set(),
 
-        // Check if the assets (paths) are already loaded
-        check(paths) {
-            return Array.isArray(paths)
-                ? paths.every(path => this.loaded.has(path))
-                : this.loaded.has(paths)
-        },
+            // Check if the assets (paths) are already loaded
+            check(paths) {
+                return Array.isArray(paths)
+                    ? paths.every(path => this.loaded.has(path))
+                    : this.loaded.has(paths)
+            },
 
-        // Mark the assets (paths) as loaded
-        markLoaded(paths) {
-            Array.isArray(paths)
-                ? paths.forEach(path => this.loaded.add(path))
-                : this.loaded.add(paths)
-        }
+            // Mark the assets (paths) as loaded
+            markLoaded(paths) {
+                Array.isArray(paths)
+                    ? paths.forEach(path => this.loaded.add(path))
+                    : this.loaded.add(paths)
+            }
+        })
     })
 
     /**
