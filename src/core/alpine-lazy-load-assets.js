@@ -193,7 +193,7 @@ export default function (Alpine) {
         const asModule = el.getAttribute('data-js-as-module') || el.getAttribute('data-as-module') || false
         const eventName = el.getAttribute('data-dispatch')
 
-        Promise.all(paths.map(path => loadJS(path, position, relativePosition, targetScript,asModule)))
+        Promise.all(paths.map(path => loadJS(path, position, relativePosition, targetScript, asModule)))
             .then(() => {
                 //console.log('All JS files loaded!')
                 if (eventName) {
