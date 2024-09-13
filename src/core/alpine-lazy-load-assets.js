@@ -1,11 +1,21 @@
+/**
+ * This function initializes Alpine.js custom stores and directives for lazily loading CSS and JS assets.
+ * @param {Object} Alpine - The Alpine.js instance
+ */
 export default function (Alpine) {
+
+    // Create a store to keep track of loaded assets
     Alpine.store('lazyLoadedAssets', {
         loaded: new Set(),
+
+        // Check if the assets (paths) are already loaded
         check(paths) {
             return Array.isArray(paths)
                 ? paths.every(path => this.loaded.has(path))
                 : this.loaded.has(paths)
         },
+
+        // Mark the assets (paths) as loaded
         markLoaded(paths) {
             Array.isArray(paths)
                 ? paths.forEach(path => this.loaded.add(path))
@@ -13,13 +23,25 @@ export default function (Alpine) {
         }
     })
 
-    // Replicate Alpine.dispatch
+    /**
+     * Replicated Alpine.dispatch functionality to create a custom event
+     * @param {String} eventName - Name of the event to be dispatched
+     * @returns {CustomEvent} - The custom event
+     */
     const assetLoadedEvent = eventName => new CustomEvent(eventName, {
         bubbles: true,
         composed: true,
         cancelable: true,
     })
 
+    /**
+     * Helper function to create a DOM element with specified attributes and insert it at a specific position in the target element
+     * @param {String} elementType - Type of the element to create (e.g., 'script', 'link')
+     * @param {Object} attributes - Attributes to set on the created element
+     * @param {HTMLElement} targetElement - Target element where the new element will be added
+     * @param {HTMLElement} insertBeforeElement - Existing element before which the new element will be added
+     * @returns {HTMLElement} - The created DOM element
+     */
     const createDomElement = (elementType, attributes = {}, targetElement, insertBeforeElement) => {
         const element = document.createElement(elementType)
         Object.entries(attributes).forEach(([attribute, value]) => element[attribute] = value)
@@ -35,6 +57,15 @@ export default function (Alpine) {
         return element
     }
 
+    /**
+     * Helper function to load a CSS or JS asset
+     * @param {String} elementType - Type of the element to create ('link' for CSS, 'script' for JS)
+     * @param {String} path - Path to the asset
+     * @param {Object} attributes - Attributes to set on the created element
+     * @param {HTMLElement} targetElement - Target element where the asset element will be added
+     * @param {HTMLElement} insertBeforeElement - Existing element before which the asset element will be added
+     * @returns {Promise} - Resolves when the asset is loaded or rejects if loading fails
+     */
     const loadAsset = (elementType, path, attributes = {}, targetElement = null, insertBeforeElement = null) => {
         const selector = elementType === 'link' ? `link[href="${path}"]` : `script[src="${path}"]`
 
@@ -42,7 +73,9 @@ export default function (Alpine) {
             return Promise.resolve()
         }
 
-        const elementAttributes = elementType === 'link' ? { ...attributes, href: path } : { ...attributes, src: path }
+        const elementAttributes = elementType === 'link'
+            ? { ...attributes, href: path }
+            : { ...attributes, src: path }
         const element = createDomElement(elementType, elementAttributes, targetElement, insertBeforeElement)
 
         return new Promise((resolve, reject) => {
@@ -57,6 +90,13 @@ export default function (Alpine) {
         })
     }
 
+    /**
+     * Load a CSS file with specified options
+     * @param {String} path - Path to the CSS file
+     * @param {String} mediaAttr - Media attribute for the link element
+     * @param {String} position - Specifies whether to insert the link element before or after a target link element
+     * @param {String} target - Target link element before or after which the new link element will be inserted
+     */
     const loadCSS = async (path, mediaAttr, position = null, target = null) => {
         // Define attributes for CSS link element
         const attributes = { type: 'text/css', rel: 'stylesheet' }
@@ -85,6 +125,13 @@ export default function (Alpine) {
         await loadAsset('link', path, attributes, targetElement, insertBeforeElement)
     }
 
+    /**
+     * Load a JS file with specified options
+     * @param {String} path - Path to the JS file
+     * @param {Set<String>} position - Set containing position modifiers (e.g., 'body-start', 'body-end')
+     * @param {String} relativePosition - Relative position to insert the new script element (before or after)
+     * @param {String} targetScript - Target script element before or after which the new script element will be inserted
+     */
     const loadJS = async (path, position, relativePosition = null, targetScript = null) => {
         // Default insertion point is head
         let targetElement = document.head

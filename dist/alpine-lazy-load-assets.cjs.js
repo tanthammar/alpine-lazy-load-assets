@@ -40,18 +40,14 @@ function alpine_lazy_load_assets_default(Alpine) {
       Array.isArray(paths) ? paths.forEach((path) => this.loaded.add(path)) : this.loaded.add(paths);
     }
   });
-  function assetLoadedEvent(eventName) {
-    return new CustomEvent(eventName, {
-      bubbles: true,
-      composed: true,
-      cancelable: true
-    });
-  }
-  function createDomElement(elementType, attributes = {}, targetElement, insertBeforeElement) {
+  const assetLoadedEvent = (eventName) => new CustomEvent(eventName, {
+    bubbles: true,
+    composed: true,
+    cancelable: true
+  });
+  const createDomElement = (elementType, attributes = {}, targetElement, insertBeforeElement) => {
     const element = document.createElement(elementType);
-    for (const [attribute, value] of Object.entries(attributes)) {
-      element[attribute] = value;
-    }
+    Object.entries(attributes).forEach(([attribute, value]) => element[attribute] = value);
     if (targetElement) {
       if (insertBeforeElement) {
         targetElement.insertBefore(element, insertBeforeElement);
@@ -60,8 +56,8 @@ function alpine_lazy_load_assets_default(Alpine) {
       }
     }
     return element;
-  }
-  function loadAsset(elementType, path, attributes = {}, targetElement = null, insertBeforeElement = null) {
+  };
+  const loadAsset = (elementType, path, attributes = {}, targetElement = null, insertBeforeElement = null) => {
     const selector = elementType === "link" ? `link[href="${path}"]` : `script[src="${path}"]`;
     if (document.querySelector(selector) || Alpine.store("lazyLoadedAssets").check(path)) {
       return Promise.resolve();
@@ -77,8 +73,8 @@ function alpine_lazy_load_assets_default(Alpine) {
         reject(new Error(`Failed to load ${elementType}: ${path}`));
       };
     });
-  }
-  async function loadCSS(path, mediaAttr, position = null, target = null) {
+  };
+  const loadCSS = async (path, mediaAttr, position = null, target = null) => {
     const attributes = { type: "text/css", rel: "stylesheet" };
     if (mediaAttr) {
       attributes.media = mediaAttr;
@@ -88,27 +84,37 @@ function alpine_lazy_load_assets_default(Alpine) {
     if (position && target) {
       const targetLink = document.querySelector(`link[href*="${target}"]`);
       if (targetLink) {
-        targetElement = targetLink.parentNode;
+        targetElement = targetLink.parentElement;
         insertBeforeElement = position === "before" ? targetLink : targetLink.nextSibling;
       } else {
         console.warn(`Target (${target}) not found for ${path}. Appending to head.`);
+        targetElement = document.head;
+        insertBeforeElement = null;
       }
     }
     await loadAsset("link", path, attributes, targetElement, insertBeforeElement);
-  }
-  async function loadJS(path, position, relativePosition = null, targetScript = null) {
-    let positionElement, insertBeforeElement;
+  };
+  const loadJS = async (path, position, relativePosition = null, targetScript = null) => {
+    let targetElement = document.head;
+    let insertBeforeElement = null;
     if (relativePosition && targetScript) {
-      positionElement = document.querySelector(`script[src*="${targetScript}"]`);
-      if (positionElement) {
-        insertBeforeElement = relativePosition === "before" ? positionElement : positionElement.nextSibling;
+      const targetScriptElement = document.querySelector(`script[src*="${targetScript}"]`);
+      if (targetScriptElement) {
+        targetElement = targetScriptElement.parentElement;
+        insertBeforeElement = relativePosition === "before" ? targetScriptElement : targetScriptElement.nextSibling;
       } else {
-        console.warn(`Target (${targetScript}) not found for ${path}. Appending to body.`);
+        console.warn(`Target (${targetScript}) not found for ${path}. Falling back to head or body.`);
+        targetElement = document.head;
+        insertBeforeElement = null;
+      }
+    } else if (position.has("body-start") || position.has("body-end")) {
+      targetElement = document.body;
+      if (position.has("body-start")) {
+        insertBeforeElement = document.body.firstChild;
       }
     }
-    const insertLocation = position.has("body-start") ? "prepend" : "append";
-    await loadAsset("script", path, {}, positionElement || document[position.has("body-end") ? "body" : "head"], insertBeforeElement);
-  }
+    await loadAsset("script", path, {}, targetElement, insertBeforeElement);
+  };
   Alpine.directive("load-css", (el, { expression }, { evaluate }) => {
     const paths = evaluate(expression);
     const mediaAttr = el.media;
@@ -117,11 +123,9 @@ function alpine_lazy_load_assets_default(Alpine) {
     const target = el.getAttribute("data-css-before") || el.getAttribute("data-css-after") || null;
     Promise.all(paths.map((path) => loadCSS(path, mediaAttr, position, target))).then(() => {
       if (eventName) {
-        window.dispatchEvent(assetLoadedEvent(eventName + "-css"));
+        window.dispatchEvent(assetLoadedEvent(`${eventName}-css`));
       }
-    }).catch((error) => {
-      console.error(error);
-    });
+    }).catch(console.error);
   });
   Alpine.directive("load-js", (el, { expression, modifiers }, { evaluate }) => {
     const paths = evaluate(expression);
@@ -131,11 +135,9 @@ function alpine_lazy_load_assets_default(Alpine) {
     const eventName = el.getAttribute("data-dispatch");
     Promise.all(paths.map((path) => loadJS(path, position, relativePosition, targetScript))).then(() => {
       if (eventName) {
-        window.dispatchEvent(assetLoadedEvent(eventName + "-js"));
+        window.dispatchEvent(assetLoadedEvent(`${eventName}-js`));
       }
-    }).catch((error) => {
-      console.error(error);
-    });
+    }).catch(console.error);
   });
 }
 
