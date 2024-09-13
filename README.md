@@ -30,10 +30,11 @@ Laravel Filament users, see end of page.
 npm install alpine-lazy-load-assets -D
 ```
 
-#### To add the `x-load-css` and `x-load-js` directives to your project, register the plugin with Alpine.js.
+#### Script Bundle
+To add the `x-load-css` and `x-load-js` directives to your project, register the plugin with Alpine.js.
 ```js
-import Alpine from "alpinejs";
-import AlpineLazyLoadAssets from "alpine-lazy-load-assets";
+import Alpine from 'alpinejs';
+import AlpineLazyLoadAssets from 'alpine-lazy-load-assets';
 
 Alpine.plugin(AlpineLazyLoadAssets);
 
@@ -41,10 +42,19 @@ window.Alpine = Alpine;
 window.Alpine.start();
 ```
 
+#### Script include
+```js
+import AlpineLazyLoadAssets from 'alpine-lazy-load-assets'
+
+document.addEventListener('alpine:init', () => {
+    window.Alpine.plugin(AlpineLazyLoadAssets)
+})
+```
+
 #### Livewire v3
 ```js
 import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
-import AlpineLazyLoadAssets from "alpine-lazy-load-assets";
+import AlpineLazyLoadAssets from 'alpine-lazy-load-assets';
 
 Alpine.plugin(AlpineLazyLoadAssets);
 
@@ -113,7 +123,8 @@ Example from a Laravel project in combination with Async Alpine:
 ## Window events
 Define a `data-dispatch` attribute with an event name, to the same element as the css or js directives to dispatch a window event when the asset has finished loading.
 The script will append `-css` or `-js` to the event name, depending on which directive is used.
-- The event will only be dispatched once for each file path, even if the directive is used multiple times on the same page.
+- The event will be dispatched once **for each file path**
+- **_Beware that the event may be emitted multiple times._** If you have multiple elements that pushes the same asset, on the same page.
 ```html
 <div
     data-dispatch="foo-loaded"
@@ -124,6 +135,30 @@ The script will append `-css` or `-js` to the event name, depending on which dir
 //listen for the event, observe the -css or -js suffix
 <div x-on:foo-loaded-css.window="alert('the CSS file was loaded')"></div>
 <div x-on:foo-loaded-js.window="alert('the JS file was loaded')"></div>
+```
+
+### Example handling multiple window events
+In a Laravel blade file
+```html
+    <div data-js-before="app.js"
+         x-load-js="['{{ asset('js/jsoneditor.js') }}']"
+         data-dispatch="jsoneditor-loaded"
+         x-on:jsoneditor-loaded-js.window="start"
+         x-data="{
+            editor: null,
+            destroy() {
+                this.editor = null;
+            },
+            start() {
+                $nextTick(() => {
+                    if(!this.editor && typeof JSONEditor !== 'undefined') {
+                        const options = {}
+                        this.editor = new JSONEditor($refs.editor, options);
+                    }
+                });
+            }
+        }"
+    >
 ```
 
 ## Global state, check if assets are loaded
@@ -137,7 +172,7 @@ $store.lazyLoadedAssets.check(['path/foo.js', 'path/bar.css']);
 ```
 Example from a Laravel blade file
 ```html
-<div x-on:loaded-map-css.window="console.info($store.lazyLoadedAssets.check('{{ asset('bundles/EventGuideMap/EventGuideMap.css') }}'))"></div>
+<div x-on:loaded-map-css.window="console.info($store.lazyLoadedAssets.check('{{ asset('css/foo.css') }}'))"></div>
 ```
 
 
