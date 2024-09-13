@@ -31,14 +31,16 @@ __export(exports, {
 
 // src/core/alpine-lazy-load-assets.js
 function alpine_lazy_load_assets_default(Alpine) {
-  Alpine.store("lazyLoadedAssets", {
-    loaded: new Set(),
-    check(paths) {
-      return Array.isArray(paths) ? paths.every((path) => this.loaded.has(path)) : this.loaded.has(paths);
-    },
-    markLoaded(paths) {
-      Array.isArray(paths) ? paths.forEach((path) => this.loaded.add(path)) : this.loaded.add(paths);
-    }
+  document.addEventListener("alpine:init", () => {
+    Alpine.store("lazyLoadedAssets", {
+      loaded: new Set(),
+      check(paths) {
+        return Array.isArray(paths) ? paths.every((path) => this.loaded.has(path)) : this.loaded.has(paths);
+      },
+      markLoaded(paths) {
+        Array.isArray(paths) ? paths.forEach((path) => this.loaded.add(path)) : this.loaded.add(paths);
+      }
+    });
   });
   const assetLoadedEvent = (eventName) => new CustomEvent(eventName, {
     bubbles: true,
