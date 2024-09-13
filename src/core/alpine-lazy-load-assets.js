@@ -3,8 +3,8 @@
  * @param {Object} Alpine - The Alpine.js instance
  */
 export default function (Alpine) {
-
     document.addEventListener('alpine:init', () => {
+        console.info('creating store');
         // Create a store to keep track of loaded assets
         Alpine.store('lazyLoadedAssets', {
             loaded: new Set(),
