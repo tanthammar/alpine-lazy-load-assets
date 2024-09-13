@@ -72,13 +72,18 @@ export default function (Alpine) {
         // Determine target element and position
         let targetElement = document.head;
         let insertBeforeElement = null;
+
         if (position && target) {
+
+            // A certain link element has been targeted
             const targetLink = document.querySelector(`link[href*="${target}"]`)
             if (targetLink) {
-                targetElement = targetLink.parentNode;
+                targetElement = targetLink.parentElement; // Ensure we use the parent element for insertion
                 insertBeforeElement = (position === 'before') ? targetLink : targetLink.nextSibling;
             } else {
                 console.warn(`Target (${target}) not found for ${path}. Appending to head.`);
+                targetElement = document.head;
+                insertBeforeElement = null;
             }
         }
 
@@ -86,22 +91,33 @@ export default function (Alpine) {
     }
 
     async function loadJS(path, position, relativePosition = null, targetScript = null) {
-        // Determine target element and position
-        let positionElement, insertBeforeElement;
+        // Default insertion point is head
+        let targetElement = document.head;
+        let insertBeforeElement = null;
+
         if (relativePosition && targetScript) {
-            positionElement = document.querySelector(`script[src*="${targetScript}"]`);
-            if (positionElement) {
-                insertBeforeElement = relativePosition === 'before'
-                    ? positionElement
-                    : positionElement.nextSibling;
+
+            //A certain script element has been targeted
+            const targetScriptElement = document.querySelector(`script[src*="${targetScript}"]`);
+            if (targetScriptElement) {
+                targetElement = targetScriptElement.parentElement; // Ensure we use the parent element for insertion
+                insertBeforeElement = relativePosition === 'before' ? targetScriptElement : targetScriptElement.nextSibling;
             } else {
-                console.warn(`Target (${targetScript}) not found for ${path}. Appending to body.`);
+                console.warn(`Target (${targetScript}) not found for ${path}. Falling back to head or body.`);
+                targetElement = document.head;
+                insertBeforeElement = null;
+            }
+
+        } else if (position.has('body-start') || position.has('body-end')) {
+
+            //the js should go into body
+            targetElement = document.body;
+            if(position.has('body-start')) {
+                insertBeforeElement = document.body.firstChild;
             }
         }
 
-        const insertLocation = position.has('body-start') ? 'prepend' : 'append';
-
-        await loadAsset('script', path, {}, positionElement || document[position.has('body-end') ? 'body' : 'head'], insertBeforeElement);
+        await loadAsset('script', path, {}, targetElement, insertBeforeElement);
     }
 
     Alpine.directive('load-css', (el, { expression }, { evaluate }) => {
