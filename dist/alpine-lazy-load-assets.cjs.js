@@ -94,7 +94,7 @@ function alpine_lazy_load_assets_default(Alpine) {
     }
     await loadAsset("link", path, attributes, targetElement, insertBeforeElement);
   };
-  const loadJS = async (path, position, relativePosition = null, targetScript = null) => {
+  const loadJS = async (path, position, relativePosition = null, targetScript = null, asModule = null) => {
     let targetElement = document.head;
     let insertBeforeElement = null;
     if (relativePosition && targetScript) {
@@ -113,7 +113,11 @@ function alpine_lazy_load_assets_default(Alpine) {
         insertBeforeElement = document.body.firstChild;
       }
     }
-    await loadAsset("script", path, {}, targetElement, insertBeforeElement);
+    const attributes = {};
+    if (asModule) {
+      attributes.type = "module";
+    }
+    await loadAsset("script", path, attributes, targetElement, insertBeforeElement);
   };
   Alpine.directive("load-css", (el, { expression }, { evaluate }) => {
     const paths = evaluate(expression);
@@ -132,8 +136,9 @@ function alpine_lazy_load_assets_default(Alpine) {
     const position = new Set(modifiers);
     const relativePosition = el.getAttribute("data-js-before") ? "before" : el.getAttribute("data-js-after") ? "after" : null;
     const targetScript = el.getAttribute("data-js-before") || el.getAttribute("data-js-after") || null;
+    const asModule = el.getAttribute("data-js-as-module") || el.getAttribute("data-as-module") || false;
     const eventName = el.getAttribute("data-dispatch");
-    Promise.all(paths.map((path) => loadJS(path, position, relativePosition, targetScript))).then(() => {
+    Promise.all(paths.map((path) => loadJS(path, position, relativePosition, targetScript, asModule))).then(() => {
       if (eventName) {
         window.dispatchEvent(assetLoadedEvent(`${eventName}-js`));
       }
