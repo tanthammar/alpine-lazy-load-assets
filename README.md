@@ -64,6 +64,7 @@ Livewire.start();
 
 ### x-load-js
 * The `x-load-js` directive adds a `<script>` tag to the `head` or `body` of your document.
+* The script can be loaded as a module by adding the `data-js-as-module="true"` attribute.
 * You can also position the script before or after an existing script. You don't have to supply a full path, the script searches for a script tag that **contains** the given value.
 ```html
 //appended to <head>
@@ -74,6 +75,9 @@ Livewire.start();
 
 //appended to <body>
 <div x-load-js.body-end="['/path/to/your/js/file.js']"></div>
+
+//load as module
+<div data-js-as-module="true" x-load-js="['/path/to/your/js/file.js']"></div>
 
 //position before an existing script. 
 <div data-js-before="app.js" x-load-js="['/path/to/your/js/file.js']"></div>
@@ -128,8 +132,8 @@ The script will append `-css` or `-js` to the event name, depending on which dir
 ```html
 <div
     data-dispatch="foo-loaded"
-    x-load-js="['/path/to/your/js/file.js']"
-    x-load-css="['/path/to/your/css/file.css']"
+    x-load-js="['/path/to/your/js/foo.js']"
+    x-load-css="['/path/to/your/css/foo.css']"
 ></div>
 
 //listen for the event, observe the -css or -js suffix
