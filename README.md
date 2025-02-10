@@ -117,9 +117,8 @@ Example from a Laravel project in combination with Async Alpine:
         '{{ asset('bundles/AlpineFlatPicker/AlpineFlatPicker.css') }}',
         'https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/{{ $theme }}.css'
     ]"
-    x-ignore
-    ax-load="visible"
-    ax-load-src="{{ asset('bundles/AlpineFlatPicker/AlpineFlatPicker.js') }}"
+    x-load="visible"
+    x-load-src="{{ asset('bundles/AlpineFlatPicker/AlpineFlatPicker.js') }}"
     x-data="AlpineFlatPicker(...)"
 >
 ```
